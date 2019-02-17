@@ -6,7 +6,8 @@ var dom = require('xmldom').DOMParser;
 
 // Mock device data
 var rawPayload = {
-    "key1": "hello"
+    "key1": "hello",
+    "key2": "world"
 };
 
 // Vorto information model mapping specs
@@ -125,7 +126,7 @@ try {
             if (numberOfStatusProperties) {
                 console.log('Number of status properties found = ' + numberOfStatusProperties);
 
-                for (var i = 0; i < numberOfFunctionBlocks; i++) {
+                for (var i = 0; i < numberOfStatusProperties; i++) {
                     var statusPropertyName = mappingSpecs.properties[fbName].statusProperties[i].name;
                     var path = mappingSpecs.properties[fbName].statusProperties[i].stereotypes[0].attributes.xpath;
 
@@ -134,9 +135,12 @@ try {
                     console.log("path : " + path);
 
                     // Step 3 : Evaluate xpath expression
-                    var xpathResult = xpath.select(path, doc);
-                    console.log(xpathResult[0].localName + ": " + xpathResult[0].firstChild.data)
-                    status[statusPropertyName] = xpathResult[0].firstChild.data;
+                    //var xpathResult = xpath.select("concat(//key1,//key2)", doc);
+                    var xpathResult = xpath.select("string(" + path + ")", doc);
+                    console.log("xpathResult = " + xpathResult);
+
+                    status[statusPropertyName] = xpathResult;
+
                 }
 
             }
