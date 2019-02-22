@@ -1,8 +1,7 @@
 // Load library for js2xml conversion
-var js2xmlparser = require("js2xmlparser");
-var xpath = require('xpath');
-var dom = require('xmldom').DOMParser;
-
+var convertToXML = require("xml-js");
+var xpath = require('xpath')
+    , dom = require('xmldom').DOMParser
 
 // Mock device data
 var rawPayload = {
@@ -99,13 +98,15 @@ var mappingSpecs = {
 };
 
 var outputObj = {};
-var status = {};
 
 // Convert rawPayload to xml in order to use xpath
-var xmlRawPayload = js2xmlparser.parse("rawPayload", rawPayload);
-var doc = new dom().parseFromString(xmlRawPayload);
+var options = { compact: true, ignoreComment: true};
+var xmlRawPayload = convertToXML.json2xml(rawPayload, options);
 
 console.log("Raw device payload in xml ...\n" + xmlRawPayload);
+
+// var xmlRawPayload = js2xmlparser.parse("rawPayload", rawPayload);
+var doc = new dom().parseFromString(xmlRawPayload);
 
 // Iterate through the mapping spec and look for function blocks
 console.log("Mapping spec json ...");
@@ -119,7 +120,7 @@ try {
         console.log('Number of function blocks found = ' + numberOfFunctionBlocks);
         for (var i = 0; i < numberOfFunctionBlocks; i++) {
             var fbName = mappingSpecs.infoModel.functionblocks[i].name;
-
+            var status = {};
 
             // Step 2: Search for status properties in the function block along with the mapping
             var numberOfStatusProperties = mappingSpecs.properties[fbName].statusProperties.length;
@@ -137,6 +138,7 @@ try {
                     // Step 3 : Evaluate xpath expression
                     //var xpathResult = xpath.select("concat(//key1,//key2)", doc);
                     var xpathResult = xpath.select("string(" + path + ")", doc);
+
                     console.log("xpathResult = " + xpathResult);
 
                     status[statusPropertyName] = xpathResult;
@@ -155,4 +157,6 @@ try {
     console.log("Error : " + err.message);
 }
 
-console.log("Final output... \n" + JSON.stringify(outputObj, null, 2));
+
+outputObj = JSON.stringify(outputObj, null, 2);
+console.log("Final output... \n" + outputObj);
