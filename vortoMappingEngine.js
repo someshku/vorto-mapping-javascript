@@ -1,82 +1,90 @@
 // Load dependencies
-var convertToXML = require("xml-js");
-var log = require("loglevel");
-var fontoxpath = require("fontoxpath"),
-    parser = require("slimdom-sax-parser");
+const convertToXML = require("xml-js");
+const log = require("loglevel");
+const fontoxpath = require("fontoxpath");
+const parser = require("slimdom-sax-parser");
 
-var mappingSpec = null;
 
-exports.setLogLevel = function (message) {
-    if (["trace", "debug", "info", "warn", "error"].includes(message)) {
-        log.setLevel(message);
+module.exports = class VortoMapper {
+    constructor(mappingSpec) {
+        this.mappingSpec = mappingSpec;
     }
-}
 
-exports.setMappingSpec = function (mapping) {
-    mappingSpec = mapping;
-}
+    setMappingSpec(mappingSpec) {
+        this.mappingSpec = mappingSpec;
+    }
 
-exports.fontoxpath = fontoxpath;
+    setLogLevel(message) {
+        if (["trace", "debug", "info", "warn", "error"].includes(message)) {
+            log.setLevel(message);
+        }
+    }
 
-exports.transform = function (rawPayload) {
-    var outputObj = {};
+    // avoid export of fontoxpath and just pass on all arguments to the fontoxpath method
+    registerCustomXPathFunction() {
+        fontoxpath.registerCustomXPathFunction.apply(null, arguments);
+    }
 
-    // Convert rawPayload to xml in order to use xpath
-    var options = { compact: true, ignoreComment: true };
-    var xmlRawPayload = convertToXML.json2xml(rawPayload, options);
+    transform(rawPayload) {
+        // Convert rawPayload to xml in order to use xpath
+        const options = { compact: true, ignoreComment: true };
+        let xmlRawPayload = convertToXML.json2xml(rawPayload, options);
 
-    // Add a root element 
-    xmlRawPayload = "<rootNode>" + xmlRawPayload + "</rootNode>";
-    log.debug("Raw device payload in xml ...\n" + xmlRawPayload);
+        // Add a root element 
+        xmlRawPayload = `<rootNode>${xmlRawPayload}</rootNode>`;
+        log.debug("Raw device payload in xml ...\n" + xmlRawPayload);
 
-    const doc = parser.sync(xmlRawPayload);
+        const doc = parser.sync(xmlRawPayload);
 
-    // Iterate through the mapping spec and look for function blocks
-    // Step 1: Iterate over number of function blocks in the information model
+        let outputObj = {};
+        // Iterate through the mapping spec and look for function blocks
+        // Step 1: Iterate over number of function blocks in the information model
+        try {
+            const numberOfFunctionBlocks = this.mappingSpec.infoModel.functionblocks.length;
+            if (numberOfFunctionBlocks) {
+                log.debug('Number of function blocks found = ' + numberOfFunctionBlocks);
+                for (let countFB = 0; countFB < numberOfFunctionBlocks; countFB++) {
+                    const fbName = this.mappingSpec.infoModel.functionblocks[countFB].name;
 
-    try {
-        var numberOfFunctionBlocks = mappingSpec.infoModel.functionblocks.length;
-        if (numberOfFunctionBlocks) {
-            log.debug('Number of function blocks found = ' + numberOfFunctionBlocks);
-            for (var countFB = 0; countFB < numberOfFunctionBlocks; countFB++) {
-                var fbName = mappingSpec.infoModel.functionblocks[countFB].name;
+                    // Step 2: Search for status properties in the function block along with the mapping
+                    const status = this.getStatusMapping(doc, fbName);
 
-                var status = {};
-
-                // Step 2: Search for status properties in the function block along with the mapping
-                var numberOfStatusProperties = mappingSpec.properties[fbName].statusProperties.length;
-                if (numberOfStatusProperties) {
-                    log.debug('Number of status properties found = ' + numberOfStatusProperties);
-
-                    for (var countSP = 0; countSP < numberOfStatusProperties; countSP++) {
-                        var statusPropertyName = mappingSpec.properties[fbName].statusProperties[countSP].name;
-                        var path = mappingSpec.properties[fbName].statusProperties[countSP].stereotypes[0].attributes.xpath;
-
-                        log.debug("path : " + path);
-                        if (path) {
-
-                            // Step 3 : Evaluate xpath expression
-                            var xpathResult = fontoxpath.evaluateXPathToString(path, doc);
-                            log.debug("xpathResult = " + xpathResult);
-                            status[statusPropertyName] = xpathResult;
-                        }
-                    }
-
+                    // Step 3: Add all properties under the user defined function block variable
+                    outputObj[fbName] = { "status": status };
                 }
-                // Step 3: Add all properties under the user defined function block variable
-                outputObj[fbName] = { "status": status };
-
             }
+        } catch (err) {
+            log.error("Error : " + err.message);
+            throw new Error('Failed!\n' + err.message);
         }
 
+        outputObjStr = JSON.stringify(outputObj, null, 0);
+        log.debug("Final output... \n" + outputObjStr);
 
-    } catch (err) {
-        log.error("Error : " + err.message);
-        throw new Error('Failed!\n' + err.message);
+        return outputObjStr;
     }
 
-    outputObj = JSON.stringify(outputObj, null, 0);
-    log.debug("Final output... \n" + outputObj);
+    getStatusMapping(doc, fbName) {
+        let status = {};
+        const numberOfStatusProperties = this.mappingSpec.properties[fbName].statusProperties.length;
+        if (numberOfStatusProperties) {
+            log.debug('Number of status properties found = ' + numberOfStatusProperties);
 
-    return outputObj;
-};
+            for (let countSP = 0; countSP < numberOfStatusProperties; countSP++) {
+                const currentStatus = this.mappingSpec.properties[fbName].statusProperties[countSP]
+
+                const statusPropertyName = currentStatus.name;
+                const path = currentStatus.stereotypes[0].attributes.xpath;
+
+                log.debug("path : " + path);
+                if (path) {
+                    // Step 3 : Evaluate xpath expression
+                    const xpathResult = fontoxpath.evaluateXPathToString(path, doc);
+                    log.debug("xpathResult = " + xpathResult);
+                    status[statusPropertyName] = xpathResult;
+                }
+            }
+        }
+        return status
+    }
+}
