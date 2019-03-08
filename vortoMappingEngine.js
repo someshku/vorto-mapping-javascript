@@ -5,7 +5,7 @@ const fontoxpath = require("fontoxpath");
 const parser = require("slimdom-sax-parser");
 
 
-class VortoJsMapper {
+export default class VortoMapper {
     constructor(mappingSpec) {
         this.mappingSpec = mappingSpec;
     }
