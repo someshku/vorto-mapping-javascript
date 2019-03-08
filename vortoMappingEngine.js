@@ -10,11 +10,11 @@ module.exports = class VortoMapper {
         this.mappingSpec = mappingSpec;
     }
     
-    setMappingSpec = function (mappingSpec) {
+    setMappingSpec(mappingSpec) {
         this.mappingSpec = mappingSpec;
     }
     
-    setLogLevel = function (message) {
+    setLogLevel(message) {
         if (["trace", "debug", "info", "warn", "error"].includes(message)) {
             log.setLevel(message);
         }
@@ -25,9 +25,7 @@ module.exports = class VortoMapper {
         fontoxpath.registerCustomXPathFunction.apply(null, arguments);
     }
 
-    transform = function (rawPayload) {
-        let outputObj = {};
-
+    transform(rawPayload) {
         // Convert rawPayload to xml in order to use xpath
         const options = { compact: true, ignoreComment: true };
         let xmlRawPayload = convertToXML.json2xml(rawPayload, options);
@@ -38,37 +36,19 @@ module.exports = class VortoMapper {
 
         const doc = parser.sync(xmlRawPayload);
 
+        let outputObj = {};
         // Iterate through the mapping spec and look for function blocks
         // Step 1: Iterate over number of function blocks in the information model
-
         try {
-            const numberOfFunctionBlocks = mappingSpec.infoModel.functionblocks.length;
+            const numberOfFunctionBlocks = this.mappingSpec.infoModel.functionblocks.length;
             if (numberOfFunctionBlocks) {
                 log.debug('Number of function blocks found = ' + numberOfFunctionBlocks);
                 for (let countFB = 0; countFB < numberOfFunctionBlocks; countFB++) {
-                    const fbName = mappingSpec.infoModel.functionblocks[countFB].name;
-
-                    let status = {};
-
+                    const fbName = this.mappingSpec.infoModel.functionblocks[countFB].name;
+                    
                     // Step 2: Search for status properties in the function block along with the mapping
-                    const numberOfStatusProperties = mappingSpec.properties[fbName].statusProperties.length;
-                    if (numberOfStatusProperties) {
-                        log.debug('Number of status properties found = ' + numberOfStatusProperties);
-
-                        for (let countSP = 0; countSP < numberOfStatusProperties; countSP++) {
-                            const statusPropertyName = mappingSpec.properties[fbName].statusProperties[countSP].name;
-                            const path = mappingSpec.properties[fbName].statusProperties[countSP].stereotypes[0].attributes.xpath;
-
-                            log.debug("path : " + path);
-                            if (path) {
-
-                                // Step 3 : Evaluate xpath expression
-                                const xpathResult = fontoxpath.evaluateXPathToString(path, doc);
-                                log.debug("xpathResult = " + xpathResult);
-                                status[statusPropertyName] = xpathResult;
-                            }
-                        }
-                    }
+                    const status = this.getStatusMapping(doc, fbName);
+                    
                     // Step 3: Add all properties under the user defined function block variable
                     outputObj[fbName] = { "status": status };
                 }
@@ -82,5 +62,29 @@ module.exports = class VortoMapper {
         log.debug("Final output... \n" + outputObjStr);
         
         return outputObjStr;
+    }
+    
+    getStatusMapping(doc, fbName) {
+        let status = {};
+        const numberOfStatusProperties = this.mappingSpec.properties[fbName].statusProperties.length;
+        if (numberOfStatusProperties) {
+            log.debug('Number of status properties found = ' + numberOfStatusProperties);
+
+            for (let countSP = 0; countSP < numberOfStatusProperties; countSP++) {
+                const currentStatus = this.mappingSpec.properties[fbName].statusProperties[countSP]
+                
+                const statusPropertyName = currentStatus.name;
+                const path = currentStatus.stereotypes[0].attributes.xpath;
+
+                log.debug("path : " + path);
+                if (path) {
+                    // Step 3 : Evaluate xpath expression
+                    const xpathResult = fontoxpath.evaluateXPathToString(path, doc);
+                    log.debug("xpathResult = " + xpathResult);
+                    status[statusPropertyName] = xpathResult;
+                }
+            }
+        }
+        return status
     }
 }
