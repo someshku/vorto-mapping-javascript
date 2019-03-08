@@ -8,7 +8,7 @@ The package is an effort to making it easier for developers to map arbitrary dev
 
 # Installation
 ```bash
-npm install vortomapping
+npm install vorto-mapper
 ```
 
 
