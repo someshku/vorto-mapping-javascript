@@ -80,24 +80,25 @@ Download it to use with our nodejs library:
 
 
 # Usage
-
-    var vortoMappingEngine = require("vorto-mapper");
+    const VortoMapper = require("vorto-mapper")
     
-    var rawPayload = {
+    const vortoMapper = new VortoMapper();
+    
+    const rawPayload = {
         "temperature": "82.4f"
     };
     
-    var mappingSpec = {}; // copy the downloaded mapping spec
+    const mappingSpec = {}; // copy the downloaded mapping spec
     
-    vortoMappingEngine.setMappingSpec(mappingSpec);
-    vortoMappingEngine.transform(rawPayload);
+    vortoMapper.setMappingSpec(mappingSpec);
+    vortoMapper.transform(rawPayload);
     
 
 ### Registering Custom Functions
 
 To register user defined functions for the mapping, we will leverage on the functionality provided by [fontoxpath](https://www.npmjs.com/package/fontoxpath). Note the additional parameter 'dynamicContext' which needs to be added as the first parameter of the function.
 
-    vortoMappingEngine.fontoxpath.registerCustomXPathFunction(
+    vortoMapper.registerCustomXPathFunction(
         'temperature:fToC',
         ['xs:string'], 'xs:string',
         function fToC(dynamicContext, fahrenheit) 
@@ -113,4 +114,4 @@ To register user defined functions for the mapping, we will leverage on the func
 The library internally uses [loglevel](https://www.npmjs.com/package/loglevel) npm package. 
 To enable debug level logs set the corresponding log level.
 
-    vortoMappingEngine.setLogLevel("debug");
+    vortoMapper.setLogLevel("debug");
