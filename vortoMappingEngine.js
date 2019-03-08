@@ -58,7 +58,7 @@ module.exports = class VortoMapper {
             throw new Error('Failed!\n' + err.message);
         }
 
-        outputObjStr = JSON.stringify(outputObj, null, 0);
+        const outputObjStr = JSON.stringify(outputObj, null, 0);
         log.debug("Final output... \n" + outputObjStr);
 
         return outputObjStr;
