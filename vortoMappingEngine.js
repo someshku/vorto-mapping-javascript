@@ -9,19 +9,19 @@ module.exports = class VortoMapper {
     constructor(mappingSpec) {
         this.mappingSpec = mappingSpec;
     }
-    
+
     setMappingSpec(mappingSpec) {
         this.mappingSpec = mappingSpec;
     }
-    
+
     setLogLevel(message) {
         if (["trace", "debug", "info", "warn", "error"].includes(message)) {
             log.setLevel(message);
         }
     }
-    
+
     // avoid export of fontoxpath and just pass on all arguments to the fontoxpath method
-    registerCustomXPathFunction = function () {
+    registerCustomXPathFunction() {
         fontoxpath.registerCustomXPathFunction.apply(null, arguments);
     }
 
@@ -45,10 +45,10 @@ module.exports = class VortoMapper {
                 log.debug('Number of function blocks found = ' + numberOfFunctionBlocks);
                 for (let countFB = 0; countFB < numberOfFunctionBlocks; countFB++) {
                     const fbName = this.mappingSpec.infoModel.functionblocks[countFB].name;
-                    
+
                     // Step 2: Search for status properties in the function block along with the mapping
                     const status = this.getStatusMapping(doc, fbName);
-                    
+
                     // Step 3: Add all properties under the user defined function block variable
                     outputObj[fbName] = { "status": status };
                 }
@@ -57,13 +57,13 @@ module.exports = class VortoMapper {
             log.error("Error : " + err.message);
             throw new Error('Failed!\n' + err.message);
         }
-        
+
         outputObjStr = JSON.stringify(outputObj, null, 0);
         log.debug("Final output... \n" + outputObjStr);
-        
+
         return outputObjStr;
     }
-    
+
     getStatusMapping(doc, fbName) {
         let status = {};
         const numberOfStatusProperties = this.mappingSpec.properties[fbName].statusProperties.length;
@@ -72,7 +72,7 @@ module.exports = class VortoMapper {
 
             for (let countSP = 0; countSP < numberOfStatusProperties; countSP++) {
                 const currentStatus = this.mappingSpec.properties[fbName].statusProperties[countSP]
-                
+
                 const statusPropertyName = currentStatus.name;
                 const path = currentStatus.stereotypes[0].attributes.xpath;
 
