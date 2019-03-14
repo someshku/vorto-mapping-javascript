@@ -42,7 +42,7 @@ module.exports = class VortoMapper {
         try {
             const numberOfFunctionBlocks = this.mappingSpec.infoModel.functionblocks.length;
             if (numberOfFunctionBlocks) {
-                log.debug('Number of function blocks found = ' + numberOfFunctionBlocks);
+                log.debug("Number of function blocks found = " + numberOfFunctionBlocks);
                 for (let countFB = 0; countFB < numberOfFunctionBlocks; countFB++) {
                     const fbName = this.mappingSpec.infoModel.functionblocks[countFB].name;
 
@@ -50,12 +50,12 @@ module.exports = class VortoMapper {
                     const status = this.getStatusMapping(doc, fbName);
 
                     // Step 3: Add all properties under the user defined function block variable
-                    outputObj[fbName] = { "status": status };
+                    outputObj[fbName] = { status };
                 }
             }
         } catch (err) {
             log.error("Error : " + err.message);
-            throw new Error('Failed!\n' + err.message);
+            throw new Error("Failed!\n" + err.message);
         }
 
         const outputObjStr = JSON.stringify(outputObj, null, 0);
@@ -68,10 +68,10 @@ module.exports = class VortoMapper {
         let status = {};
         const numberOfStatusProperties = this.mappingSpec.properties[fbName].statusProperties.length;
         if (numberOfStatusProperties) {
-            log.debug('Number of status properties found = ' + numberOfStatusProperties);
+            log.debug("Number of status properties found = " + numberOfStatusProperties);
 
             for (let countSP = 0; countSP < numberOfStatusProperties; countSP++) {
-                const currentStatus = this.mappingSpec.properties[fbName].statusProperties[countSP]
+                const currentStatus = this.mappingSpec.properties[fbName].statusProperties[countSP];
 
                 const statusPropertyName = currentStatus.name;
                 const path = currentStatus.stereotypes[0].attributes.xpath;
@@ -85,6 +85,6 @@ module.exports = class VortoMapper {
                 }
             }
         }
-        return status
+        return status;
     }
-}
+};
