@@ -44,7 +44,7 @@ module.exports = class VortoMapper {
             if (numberOfFunctionBlocks) {
                 log.debug("Number of function blocks found = " + numberOfFunctionBlocks);
 
-                this.mappingSpec.infoModel.functionblocks.forEach(functionBlock => {
+                this.mappingSpec.infoModel.functionblocks.forEach((functionBlock) => {
                     const fbName = functionBlock.name;
                     // Step 2: Search for status properties in the function block along with the mapping
                     const status = this.getStatusMapping(doc, fbName);
