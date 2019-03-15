@@ -18,7 +18,7 @@
     "url": "git+https://github.com/someshku/vorto-mapping-javascript.git"
   },
   "keywords": [
-    "vorto"
+    "vorto", "vorto mapper", "vorto mapping engine"
   ],
   "author": "Somesh Kumar",
   "license": "MIT",
