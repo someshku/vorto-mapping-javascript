@@ -43,15 +43,16 @@ module.exports = class VortoMapper {
             const numberOfFunctionBlocks = this.mappingSpec.infoModel.functionblocks.length;
             if (numberOfFunctionBlocks) {
                 log.debug("Number of function blocks found = " + numberOfFunctionBlocks);
-                for (let countFB = 0; countFB < numberOfFunctionBlocks; countFB++) {
-                    const fbName = this.mappingSpec.infoModel.functionblocks[countFB].name;
 
+                this.mappingSpec.infoModel.functionblocks.forEach(functionBlock => {
+                    const fbName = functionBlock.name;
                     // Step 2: Search for status properties in the function block along with the mapping
                     const status = this.getStatusMapping(doc, fbName);
 
                     // Step 3: Add all properties under the user defined function block variable
                     outputObj[fbName] = { status };
-                }
+                });
+
             }
         } catch (err) {
             log.error("Error : " + err.message);
