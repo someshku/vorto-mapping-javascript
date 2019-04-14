@@ -6,3 +6,4 @@ deploy:
   on:
       branch: production
   tag: beta
+  language: node_js
