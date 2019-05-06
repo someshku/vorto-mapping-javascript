@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - 10
+script:
+- echo "skipping tests"
+deploy:
+  provider: npm
+  email: someshkumarsharma.sks@gmail.com
+  api_key:
+    secure: xX8nQ6/+QpWpAiYtb5Pzeo/xp+PcfdKFtnNsylAT6K+3YFyDFC2kAPhdL01D6tyk6HRuEFib05bf3k9KelquuJA7T7tidhwQ61BA7sBoKz/IbaToOL4z2zdISrv79m+p0pb83Jk0a1pCK3h2XWsnRuDAm+Cx7AJkfAP1RP+M7vR0kRUKIQOP4omx9bqiXMNYJzkoXJHRZvWzZaszjN72xWHoqTvJRvtJYWszsQILn3s683VugM0L0S+u1COVcgl9WEcD2hGkQDj1n+CIwqIrklROLSobbw1EUfw3rjWhGftCJxDgH2Lsk91mw1RH8oZjRyFXaujYkeHY3vmK6OhKIpgOzJ0fGe6hfsMhCfhwk2L7wlaPWp+mfXTjZVrVDvoNZ/HY+ENDGAcpSGaMe4bepj3Hpqih/FnauHmxepSbdq+X7vBFaOXSKLqHo5jNczFR7IT2oRIv4EiM/GiT5sK+tkZJLeGarvDx/Ion3ByKqeVzkxPVqd2sSoxC9tRh7+1CIs7a21JgZ8mwLi0cw91RLbalVrK5hENZ/cYl2jAkSWTN9ikNXUwhXU0cC3V1XBppShd/TQ73z0IuVK5sil15pFotAhNcxChRszts68EHGKkS+vXy3/bIYT9zRomRx3P/xIWal/5J1qzCQbnU2dLkAG6AVI5z7RA/B/MszPUcxLA=
+  on:
+      branch: master
+  tag: beta
